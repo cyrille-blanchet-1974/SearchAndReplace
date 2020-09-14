@@ -2,7 +2,28 @@ use std::fs::File;
 use std::io::BufRead;
 use std::io::BufReader;
 
-pub fn read(fic: &str, searched : &str) -> bool {
+pub fn replace(l:&str,searched:&str,replace:&str)->String{
+    let debug = true;
+    let original = String::from(l);
+    let col_pos = l.find(&searched).unwrap_or(l.len());
+    //cut string in three parts
+    let mut line = String::from(l);
+    let after = line.split_off(col_pos + searched.len());
+    let _s= line.split_off(col_pos);
+    let before = line;
+    //replace
+    let mut replaced= String::from(before);
+    //replaced.push_str(before.as_str());
+    replaced.push_str(replace);
+    replaced.push_str(after.as_str());
+    if debug {
+        println!("original:{}",original);
+        println!("newline :{}",replaced);
+    }
+    replaced
+}
+
+pub fn read(fic: &str, searched_str : &str,replaced_str : &str, first_only:bool) -> bool {
     let mut already_find = false;
     let input = File::open(&fic);
     match input {
@@ -11,25 +32,22 @@ pub fn read(fic: &str, searched : &str) -> bool {
         }
         Ok(f) => {
             let buffered = BufReader::new(f);
-            let mut line_pos = 0;
             for line in buffered.lines() {
                 if let Ok(l) = line {
-                    line_pos+=1;
-                    //TODO if already found and change only one 
-                    //then just copy others datas
-                    if l.contains(&searched)
+                    if l.contains(&searched_str)
                     {
-                        println!("Found at line {}",line_pos);
-                        if already_find{
-                            println!("not the first time");
-                        }
+                        let res:String;
+                        if !already_find{
+                            res= replace(&l, searched_str, replaced_str);
+                        }else{
+                            if !first_only{
+                                res= replace(&l, searched_str, replaced_str);
+                            }else{
+                                res = String::from(l);
+                            }
+                        } 
                         already_find = true;
-                        let col_pos = l.find(&searched).unwrap_or(l.len());
-                        println!("Found at column {}",col_pos +1);
-                        println!("{}",l);
-                        println!("123456789012345678901234567890123456789012345678901234567890");
-                        //TODO : replace
-                        //TODO : write changed line
+                        //TODO : write res line
                     }
                     else
                     {
@@ -44,7 +62,7 @@ pub fn read(fic: &str, searched : &str) -> bool {
 
 fn main() {
     println!("Search and replace");
-    if read("./src/main.rs","Search and replace")
+    if read("./src/main.rs","Search and replace","Found and replaced",true)
     {
         println!("found")
     }
