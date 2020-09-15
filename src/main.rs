@@ -1,3 +1,5 @@
+mod paramcli;
+
 use std::fs::File;
 use std::io::BufRead;
 use std::io::BufReader;
@@ -6,6 +8,7 @@ use std::thread::{spawn, JoinHandle};
 use std::sync::mpsc::Receiver;
 use std::sync::mpsc::Sender;
 use std::io::{BufWriter, Write};
+use paramcli::*;
 
 pub fn start_thread_read(
     to_search: Sender<String>,
@@ -152,15 +155,7 @@ pub fn traitement(fic:&str,search_str:&str,replace_str:&str,only_first:bool){
 }
 
 fn main() {
-    println!("Search and replace");
-
-    let fic = "./src/main.rs";
-    let search_str = "Search and replace";
-    let replace_str = "Found and replaced";
-    let only_first = true;
-
-    traitement(fic,search_str,replace_str,only_first);
-
-    println!("Search and replace All");
-    traitement(fic,search_str,replace_str,false);
+    println!("Search and replace 1.0 (2020)");
+    let param = Paramcli::new();
+    traitement(&param.file,&param.search,&param.replace,param.only_first);
 }
