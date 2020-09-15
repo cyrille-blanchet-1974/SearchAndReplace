@@ -5,6 +5,7 @@ use std::sync::mpsc::channel;
 use std::thread::{spawn, JoinHandle};
 use std::sync::mpsc::Receiver;
 use std::sync::mpsc::Sender;
+use std::io::{BufWriter, Write};
 
 pub fn start_thread_read(
     to_search: Sender<String>,
@@ -92,14 +93,35 @@ fn replace_test() {
     assert_eq!(st3, replace(st3,st2,st1));
 }
 
+#[cfg(unix)]
+pub static EOL: &str = "\n";
+
+#[cfg(windows)]
+pub static EOL: &str = "\r\n";
+
 pub fn start_thread_write(
     from_search: Receiver<String>,
     fic_out:&str
 ) -> JoinHandle<()> {
-    println!("TODO : write to {}",fic_out);
+    let name = String::from(fic_out);
     spawn(move || {
+        let file = match File::create(name)
+        {
+            Err(e) =>{
+                println!("Error creating file {:?}", e);
+                return;
+            },
+            Ok(fil) =>
+            {
+                fil
+            }
+        };
+        let mut writer= BufWriter::new(file);    
         for d in from_search {
-            println!("{}",d);
+            let data = format!("{}{}", d,EOL);
+            if writer.write_all(data.as_bytes()).is_err() {
+                println!("Error writing in file");
+            }
         };
     })
 }
