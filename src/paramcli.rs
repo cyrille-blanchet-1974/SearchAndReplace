@@ -1,4 +1,5 @@
 use std::env;
+use std::fs::File;
 
 #[derive(Debug)]
 pub struct Paramcli
@@ -50,6 +51,11 @@ impl Paramcli {
             }
         }
         //checks
+        if fic.is_empty() {
+            println!("ERROR! no file to work with!");
+            println!("--------------------------------------------------");
+            help(&name);
+        }
         if search.is_empty() {
             println!("ERROR! nothing to search!");
             println!("--------------------------------------------------");
@@ -60,11 +66,16 @@ impl Paramcli {
             println!("--------------------------------------------------");
             help(&name);
         }        
-        if fic.is_empty() {
-            println!("ERROR! no file to wrok with!");
+        if search == replace {
+            println!("ERROR! search and replace strings are equals!");
             println!("--------------------------------------------------");
             help(&name);
-        }        
+        }
+        //check if file exists
+        if File::open(&fic).is_err() {
+            println!("Error file {} doesn't exists or unereadable", &fic);
+            help(&name);
+        };
         Paramcli {
             search,
             replace,
