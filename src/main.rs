@@ -71,20 +71,21 @@ pub fn start_thread_search(
     })
 }
 
-pub fn replace(l:&str,searched:&str,replace:&str)->String{
+pub fn replace(l:&str,searched:&str,replaced:&str)->String{
     if !l.contains(&searched) {return String::from(l);}
     let col_pos = l.find(&searched).unwrap_or_else(|| l.len());
     //cut string in three parts
     let mut line = String::from(l);
-    let after = line.split_off(col_pos + searched.len());
+    let mut after = line.split_off(col_pos + searched.len());
     let _s= line.split_off(col_pos);
     let before = line;
     //replace
-    let mut replaced= before;
-    replaced.push_str(replace);
-    replaced.push_str(after.as_str());
-    replaced
-    //TODO: carefull after can also contain searched 
+    let mut res= before;
+    res.push_str(replaced);
+    //carefull after can also contain searched 
+    after = replace(&after,&searched,&replaced);
+    res.push_str(after.as_str());
+    res
 }
 
 #[test]
