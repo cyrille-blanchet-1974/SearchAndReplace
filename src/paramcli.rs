@@ -32,23 +32,58 @@ impl Paramcli {
             {
                 help(&name);
             }
+            match get_param2(&arg,String::from("/search:")){
+                Some(n) => {
+                    search = n;
+                    continue;
+                },
+                None => {}
+            }
+            /*
             if arg.to_lowercase().starts_with("/search:") {
                 search = get_param(arg);
                 continue;
             }
+            */
+            match get_param2(&arg,String::from("/replace:")){
+                Some(n) => {
+                    replace = n;
+                    continue;
+                },
+                None => {}
+            }
+            /*
             if arg.to_lowercase().starts_with("/replace:") {
                 replace = get_param(arg);
                 continue;
             }
+            */
+            match get_param2(&arg,String::from("/fic:")){
+                Some(n) => {
+                    fic = n;
+                    continue;
+                },
+                None => {}
+            }
+            /*
             if arg.to_lowercase().starts_with("/fic:") {
                 fic = get_param(arg);
                 continue;
             }
-
+            */
+            match get_param2(&arg,String::from("/only_first")){
+                Some(_) => {
+                    only_first = true;
+                    continue;
+                },
+                None => {}
+            }
+            /*
             if arg.to_lowercase() == "/only_first" {
                 only_first = true;
                 continue;
             }
+            */
         }
         //checks
         if fic.is_empty() {
@@ -85,6 +120,14 @@ impl Paramcli {
     }
 }
 
+fn get_param2(arg: &str,switch :String)->Option<String>{
+    if arg.to_lowercase().starts_with(&switch) {
+        let mut a = String::from(arg);
+        return Some(a.split_off(switch.len()));
+    }
+    None
+}
+/*
 fn get_param(arg: String) -> String {
     let mut res = String::new();
     for part in arg.split(':').skip(1) {
@@ -98,7 +141,7 @@ fn get_param(arg: String) -> String {
     }
     res
 }
-
+*/
 fn help(name:&str) {
     println!("syntax : {} /search:search_string /replace:replace_string /fic:file [/only_first]",name);
     println!("paramerters between [] are optionnals");
