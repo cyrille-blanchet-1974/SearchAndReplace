@@ -17,6 +17,7 @@ impl Paramcli {
         let mut search = String::new();
         let mut replace = String::new();
         let mut only_first = false;
+        let mut replace_param=false;
 
         let args: Vec<String> = env::args().skip(1).collect();
         let name = env::args().take(1).next().unwrap_or_else(||String::from("search_and_replace"));
@@ -32,58 +33,23 @@ impl Paramcli {
             {
                 help(&name);
             }
-            match get_param2(&arg,String::from("/search:")){
-                Some(n) => {
+            if let Some(n) = get_param(&arg,String::from("/search:")){
                     search = n;
                     continue;
-                },
-                None => {}
             }
-            /*
-            if arg.to_lowercase().starts_with("/search:") {
-                search = get_param(arg);
+            if let Some(n) = get_param(&arg,String::from("/replace:")){
+                replace = n;
+                replace_param=true;
                 continue;
             }
-            */
-            match get_param2(&arg,String::from("/replace:")){
-                Some(n) => {
-                    replace = n;
-                    continue;
-                },
-                None => {}
-            }
-            /*
-            if arg.to_lowercase().starts_with("/replace:") {
-                replace = get_param(arg);
+            if let Some(n) =  get_param(&arg,String::from("/fic:")){
+                fic = n;
                 continue;
             }
-            */
-            match get_param2(&arg,String::from("/fic:")){
-                Some(n) => {
-                    fic = n;
-                    continue;
-                },
-                None => {}
-            }
-            /*
-            if arg.to_lowercase().starts_with("/fic:") {
-                fic = get_param(arg);
-                continue;
-            }
-            */
-            match get_param2(&arg,String::from("/only_first")){
-                Some(_) => {
-                    only_first = true;
-                    continue;
-                },
-                None => {}
-            }
-            /*
-            if arg.to_lowercase() == "/only_first" {
+            if get_param(&arg,String::from("/only_first")).is_some(){
                 only_first = true;
                 continue;
             }
-            */
         }
         //checks
         if fic.is_empty() {
@@ -96,7 +62,7 @@ impl Paramcli {
             println!("--------------------------------------------------");
             help(&name);
         }
-        if replace.is_empty() {
+        if !replace_param {
             println!("ERROR! nothing to replace!");
             println!("--------------------------------------------------");
             help(&name);
@@ -111,6 +77,7 @@ impl Paramcli {
             println!("Error file {} doesn't exists or unereadable", &fic);
             help(&name);
         };
+        println!("params : {} {} {} {}",search,replace,fic,only_first);
         Paramcli {
             search,
             replace,
@@ -120,28 +87,14 @@ impl Paramcli {
     }
 }
 
-fn get_param2(arg: &str,switch :String)->Option<String>{
+fn get_param(arg: &str,switch :String)->Option<String>{
     if arg.to_lowercase().starts_with(&switch) {
         let mut a = String::from(arg);
         return Some(a.split_off(switch.len()));
     }
     None
 }
-/*
-fn get_param(arg: String) -> String {
-    let mut res = String::new();
-    for part in arg.split(':').skip(1) {
-        if !res.is_empty() {
-            res.push_str(":");
-        }
-        res.push_str(part);
-    }
-    if arg.ends_with(':') {
-        res.push_str(":");
-    }
-    res
-}
-*/
+
 fn help(name:&str) {
     println!("syntax : {} /search:search_string /replace:replace_string /fic:file [/only_first]",name);
     println!("paramerters between [] are optionnals");
