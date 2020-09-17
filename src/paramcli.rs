@@ -8,7 +8,8 @@ pub struct Paramcli
     pub search: String,
     pub replace: String,
     pub file: String,
-    pub only_first: bool
+    pub only_first: bool,
+    pub keep_old: bool
 }
 
 impl Paramcli {
@@ -17,6 +18,7 @@ impl Paramcli {
         let mut search = String::new();
         let mut replace = String::new();
         let mut only_first = false;
+        let mut keep_old = false;
         let mut replace_param=false;
 
         let args: Vec<String> = env::args().skip(1).collect();
@@ -25,7 +27,6 @@ impl Paramcli {
             help(&name);
         }
         for arg in args {
-            println!("{}", arg);
             if arg == "/?"
                 || arg == "-?"
                 || arg.to_lowercase() == "/help"
@@ -50,6 +51,10 @@ impl Paramcli {
                 only_first = true;
                 continue;
             }
+            if get_param(&arg,String::from("/keep_old")).is_some(){
+                keep_old = true;
+                continue;
+            }            
         }
         //checks
         if fic.is_empty() {
@@ -77,12 +82,12 @@ impl Paramcli {
             println!("Error file {} doesn't exists or unereadable", &fic);
             help(&name);
         };
-        println!("params : {} {} {} {}",search,replace,fic,only_first);
         Paramcli {
             search,
             replace,
             file: fic,
-            only_first
+            only_first,
+            keep_old
         }
     }
 }
@@ -96,12 +101,13 @@ fn get_param(arg: &str,switch :String)->Option<String>{
 }
 
 fn help(name:&str) {
-    println!("syntax : {} /search:search_string /replace:replace_string /fic:file [/only_first]",name);
+    println!("syntax : {} /search:search_string /replace:replace_string /fic:file [/only_first] [/keep_old]",name);
     println!("paramerters between [] are optionnals");
     println!("------------------------------------");
     println!("search_string: String to find and to replace");
     println!("replace_string: String to put in place of searchçstring");
     println!("fic: file where to search");
     println!("/only_first: if search_string if found many times, only the first one is replaced");
+    println!("/keep_old: do a .old copy of original file");
     std::process::exit(0);
 }

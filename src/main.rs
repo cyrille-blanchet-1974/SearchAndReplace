@@ -1,141 +1,20 @@
 mod paramcli;
+mod read;
+mod write;
+mod replace;
 
-use std::fs::File;
-use std::io::BufRead;
-use std::io::BufReader;
+use std::fs::*;
 use std::sync::mpsc::channel;
-use std::thread::{spawn, JoinHandle};
-use std::sync::mpsc::Receiver;
-use std::sync::mpsc::Sender;
-use std::io::{BufWriter, Write};
 use paramcli::*;
+use read::*;
+use replace::*;
+use write::*;
 
-pub fn start_thread_read(
-    to_search: Sender<String>,
-    fic: &str,
-) -> JoinHandle<()> {
-    let file = String::from(fic);
-    spawn(move || {
-        let input = File::open(&file);
-        match input {
-            Err(e) => {
-                println!("Error reading file {} => {}", &file, e);
-            }
-            Ok(f) => {
-                let buffered = BufReader::new(f);
-                for line in buffered.lines() {
-                    if let Ok(l) = line {
-                        if to_search.send(l).is_err() {
-                            println!("error sending to search");
-                            return;
-                        }
-                    } 
-                }
-            }
-        }
-    })
-}
-
-pub fn start_thread_search(
-    from_read: Receiver<String>,
-    to_write: Sender<String>,
-    search_str:&str,
-    replace_str:&str,
-    only_first:bool
-) -> JoinHandle<()> {
-    let str_search = String::from(search_str);
-    let str_replace = String::from(replace_str);
-    let first_only = only_first;
-    spawn(move || {
-        let mut already_find = false;
-        for l in from_read {
-            let res:String=
-                if l.contains(&str_search)
-                {
-                    if !already_find || !first_only {
-                        already_find = true;
-                        replace(&l,&str_search,&str_replace)
-                    }else{
-                        already_find = true;
-                        l
-                    }                    
-                }else{
-                    l
-                };
-            if to_write.send(res).is_err() {
-                println!("error sending to write");
-                return;
-            }
-        }
-
-    })
-}
-
-pub fn replace(l:&str,searched:&str,replaced:&str)->String{
-    if !l.contains(&searched) {return String::from(l);}
-    let col_pos = l.find(&searched).unwrap_or_else(|| l.len());
-    //cut string in three parts
-    let mut line = String::from(l);
-    let mut after = line.split_off(col_pos + searched.len());
-    let _s= line.split_off(col_pos);
-    let before = line;
-    //replace
-    let mut res= before;
-    res.push_str(replaced);
-    //carefull after can also contain searched 
-    after = replace(&after,&searched,&replaced);
-    res.push_str(after.as_str());
-    res
-}
-
-#[test]
-fn replace_test() {
-    let st1="SearchAndReplace";
-    let st2="Search And Replace";
-    let st3="SearchedAndReplace";
-    assert_eq!(st1, replace(st2,st2,st1));
-    assert_eq!(st3, replace(st3,st2,st1));
-}
-
-#[cfg(unix)]
-pub static EOL: &str = "\n";
-
-#[cfg(windows)]
-pub static EOL: &str = "\r\n";
-
-pub fn start_thread_write(
-    from_search: Receiver<String>,
-    fic_out:&str
-) -> JoinHandle<()> {
-    let name = String::from(fic_out);
-    spawn(move || {
-        let file = match File::create(name)
-        {
-            Err(e) =>{
-                println!("Error creating file {:?}", e);
-                return;
-            },
-            Ok(fil) =>
-            {
-                fil
-            }
-        };
-        let mut writer= BufWriter::new(file);    
-        for d in from_search {
-            let data = format!("{}{}", d,EOL);
-            if writer.write_all(data.as_bytes()).is_err() {
-                println!("Error writing in file");
-            }
-        };
-    })
-}
-
-pub fn traitement(fic:&str,search_str:&str,replace_str:&str,only_first:bool){
+pub fn traitement(fic:&str,search_str:&str,replace_str:&str,only_first:bool,keep_old:bool){
     let mut fic_out = String::from(fic);
     fic_out.push_str(".chg");
 
     //MPSC chanels
-    //read threads to join thread
     let (to_search, from_read) = channel();
     let (to_write, from_search) = channel();
 
@@ -153,10 +32,26 @@ pub fn traitement(fic:&str,search_str:&str,replace_str:&str,only_first:bool){
     if hwrite.join().is_err() {
         println!("Thread write finished with error");
     }
+
+    if keep_old{
+        let mut fic_old = String::from(fic);
+        fic_old.push_str(".old");
+        if rename(&fic, &fic_old).is_err(){
+            println!("erreor renaming {} to {} aborting",fic,fic_old);
+            return;
+        }
+    }else if remove_file(fic).is_err(){
+        println!("erreor removing {} aborting",fic);
+        return;
+    }
+    if rename(&fic_out, &fic).is_err(){
+        println!("erreor renaming {} to {} aborting",fic_out,fic);
+        return;
+    }
 }
 
 fn main() {
     println!("Search and replace 1.0 (2020)");
     let param = Paramcli::new();
-    traitement(&param.file,&param.search,&param.replace,param.only_first);
+    traitement(&param.file,&param.search,&param.replace,param.only_first,param.keep_old);
 }
