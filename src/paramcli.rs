@@ -105,7 +105,7 @@ fn help(name:&str) {
     println!("paramerters between [] are optionnals");
     println!("------------------------------------");
     println!("search_string: String to find and to replace");
-    println!("replace_string: String to put in place of searchçstring");
+    println!("replace_string: String to put in place of search_string");
     println!("fic: file where to search");
     println!("/only_first: if search_string if found many times, only the first one is replaced");
     println!("/keep_old: do a .old copy of original file");
