@@ -12,6 +12,12 @@ pub struct Paramcli
     pub keep_old: bool
 }
 
+impl Default for Paramcli {
+    fn default() -> Self {
+        Paramcli::new()
+    }
+}
+
 impl Paramcli {
     pub fn new() -> Paramcli {
         let mut fic = String::new();
@@ -111,3 +117,5 @@ fn help(name:&str) {
     println!("/keep_old: do a .old copy of original file");
     std::process::exit(0);
 }
+
+
