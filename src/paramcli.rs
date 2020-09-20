@@ -9,7 +9,7 @@ pub struct Paramcli
     pub replace: String,
     pub file: String,
     pub only_first: bool,
-    pub keep_old: bool
+    pub keep_old: bool,
 }
 
 impl Default for Paramcli {
@@ -25,10 +25,13 @@ impl Paramcli {
         let mut replace = String::new();
         let mut only_first = false;
         let mut keep_old = false;
-        let mut replace_param=false;
+        let mut replace_param = false;
 
         let args: Vec<String> = env::args().skip(1).collect();
-        let name = env::args().take(1).next().unwrap_or_else(||String::from("search_and_replace"));
+        let name = env::args()
+            .take(1)
+            .next()
+            .unwrap_or_else(|| String::from("search_and_replace"));
         if args.is_empty() {
             help(&name);
         }
@@ -40,27 +43,27 @@ impl Paramcli {
             {
                 help(&name);
             }
-            if let Some(n) = get_param(&arg,String::from("/search:")){
-                    search = n;
-                    continue;
-            }
-            if let Some(n) = get_param(&arg,String::from("/replace:")){
-                replace = n;
-                replace_param=true;
+            if let Some(n) = get_param(&arg, String::from("/search:")) {
+                search = n;
                 continue;
             }
-            if let Some(n) =  get_param(&arg,String::from("/fic:")){
+            if let Some(n) = get_param(&arg, String::from("/replace:")) {
+                replace = n;
+                replace_param = true;
+                continue;
+            }
+            if let Some(n) = get_param(&arg, String::from("/fic:")) {
                 fic = n;
                 continue;
             }
-            if get_param(&arg,String::from("/only_first")).is_some(){
+            if get_param(&arg, String::from("/only_first")).is_some() {
                 only_first = true;
                 continue;
             }
-            if get_param(&arg,String::from("/keep_old")).is_some(){
+            if get_param(&arg, String::from("/keep_old")).is_some() {
                 keep_old = true;
                 continue;
-            }            
+            }
         }
         //checks
         if fic.is_empty() {
@@ -77,7 +80,7 @@ impl Paramcli {
             println!("ERROR! nothing to replace!");
             println!("--------------------------------------------------");
             help(&name);
-        }        
+        }
         if search == replace {
             println!("ERROR! search and replace strings are equals!");
             println!("--------------------------------------------------");
@@ -93,12 +96,12 @@ impl Paramcli {
             replace,
             file: fic,
             only_first,
-            keep_old
+            keep_old,
         }
     }
 }
 
-fn get_param(arg: &str,switch :String)->Option<String>{
+fn get_param(arg: &str, switch: String) -> Option<String> {
     if arg.to_lowercase().starts_with(&switch) {
         let mut a = String::from(arg);
         return Some(a.split_off(switch.len()));
@@ -106,7 +109,7 @@ fn get_param(arg: &str,switch :String)->Option<String>{
     None
 }
 
-fn help(name:&str) {
+fn help(name: &str) {
     println!("syntax : {} /search:search_string /replace:replace_string /fic:file [/only_first] [/keep_old]",name);
     println!("paramerters between [] are optionnals");
     println!("------------------------------------");
@@ -117,5 +120,3 @@ fn help(name:&str) {
     println!("/keep_old: do a .old copy of original file");
     std::process::exit(0);
 }
-
-
