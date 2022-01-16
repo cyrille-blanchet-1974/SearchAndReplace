@@ -48,7 +48,7 @@ pub fn replace(l: &str, searched: &str, replaced: &str) -> String {
     let mut res = before;
     res.push_str(replaced);
     //carefull after can also contain searched
-    after = replace(&after, &searched, &replaced);
+    after = replace(&after, searched, replaced);
     res.push_str(after.as_str());
     res
 }
