@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="iso-8859-1"?>
+
+<!-- Exécutez l'application une fois et utilisez le fichier config-dump.xml 
+	généré dans le répertoire racine pour connaitre les champs à mettre dans 
+	le fichier -->
+
+<config>
+
+	<engines name="defaultEngine" on="@@defaultEngine@@">
+		<engine name="cleaningEngine" on="@@cleaningEngine@@" />
+		<engine name="updateLogosEngine" on="@@updateLogosEngine@@" />
+	</engines>
+
+	<admin>
+		<rmiRegistryPort>@@sgx_rmi_port@@</rmiRegistryPort>
+	</admin>
+	<mail>
+		<server>@@sgx_mail_host@@</server>
+		<to>@@sgx_mail_to@@</to>
+		<from>@@sgx_mail_from@@</from>
+		<subject>@@sgx_mail_subject@@</subject>
+		<body>
+			Message automatique envoyé par Gex
+			________________________________________
+			|
+			| Erreur {0}: {1}
+			|________________________________________
+			|
+			{2}
+			|________________________________________
+
+			(Remarque: ce message peut être modifié dans config.xml; voir config-dump.xml)
+		</body>
+		<onlyOnError>@@sgx_mail_onlyOnError@@</onlyOnError>
+	</mail>
+	<http>
+		<port>@@sgx_http_port@@</port>
+		<css>@@sgx_config_css@@</css>
+	</http>
+
+	<sgx>
+		<logDir>@@sgx_log_dir@@</logDir>
+		<confDir>@@sgx_conf_dir@@</confDir>
+		<javaHome>@@sgx_java_home@@</javaHome>
+	</sgx>
+
+	<!-- Paramétrages de la purge des traces -->
+	<cleaning>
+		<scheduler unit="@@sgx_cleaning_unit@@" period="@@sgx_cleaning_period@@" when="@@sgx_purge_time@@">
+			<valid>@@sgx_cleaning_valid@@</valid>
+		</scheduler>
+		<maxRetry>@@sgx_cleaning_maxRetry@@</maxRetry>
+		<retryAllowed>@@sgx_cleaning_retryAllowed@@</retryAllowed>
+		<secondsBeforeRetry>@@sgx_cleaning_secondsBeforeRetry@@</secondsBeforeRetry>
+		<allowManualTrigger>@@sgx_cleaning_allowManualTrigger@@</allowManualTrigger>
+		<ageInDay>@@sgx_purge_ageinday@@</ageInDay>
+	</cleaning>
+
+	<logosConfig>
+		<scheduler unit="@@sgx_logos_unit@@" period="@@sgx_logos_period@@" when="@@sgx_update_logos_time@@">
+			<valid>@@sgx_logos_valid@@</valid>
+		</scheduler>
+		<maxRetry>@@sgx_logos_maxRetry@@</maxRetry>
+		<retryAllowed>@@sgx_logos_retryAllowed@@</retryAllowed>
+		<secondsBeforeRetry>@@sgx_logos_secondsBeforeRetry@@</secondsBeforeRetry>
+		<allowManualTrigger>@@sgx_logos_allowManualTrigger@@</allowManualTrigger>
+		<gestilLogosDir>@@sgx_gestil_logos_dir@@</gestilLogosDir>
+		<serviceLogosUrl>@@sgx_service_logos_url@@</serviceLogosUrl>
+		<classPath>@@sgx_conf_dir@@:@@install_dir@@/runtime/gtalogo/gtalogo.jar:@@oracle_home@@/jdbc/lib/ojdbc6.jar:@@install_dir@@/runtime/lib/log4j-api-2.17.1.jar:@@install_dir@@/runtime/lib/log4j-core-2.17.1.jar</classPath>
+	</logosConfig>
+
+</config>
