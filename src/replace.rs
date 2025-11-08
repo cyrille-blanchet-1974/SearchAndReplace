@@ -35,10 +35,10 @@ pub fn start_thread_search(
 }
 
 pub fn replace(l: &str, searched: &str, replaced: &str) -> String {
-    if !l.contains(&searched) {
+    if !l.contains(searched) {
         return String::from(l);
     }
-    let col_pos = l.find(&searched).unwrap_or_else(|| l.len());
+    let col_pos = l.find(searched).unwrap_or(l.len());
     //cut string in three parts
     let mut line = String::from(l);
     let mut after = line.split_off(col_pos + searched.len());
